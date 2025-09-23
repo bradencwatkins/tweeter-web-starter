@@ -12,6 +12,7 @@ import { UserInfoActionsContext, UserInfoContext } from "../userInfo/UserInfoCon
 interface Props {
     user: User;
     status: Status
+    featurePath: string;
 }
 
 
@@ -106,7 +107,7 @@ const statusItem = (props: Props) => {
         if (toUser) {
             if (!toUser.equals(displayedUser!)) {
             setDisplayedUser(toUser);
-            navigate(`/feed/${toUser.alias}`);
+            navigate(`${props.featurePath}/${toUser.alias}`);
             }
         }
         } catch (error) {
@@ -158,7 +159,7 @@ const statusItem = (props: Props) => {
                     </h2>
                     {props.status.formattedDate}
                     <br />
-                    <Post status={props.status} featurePath="/story" />
+                    <Post status={props.status} featurePath={props.featurePath} />
                   </div>
                 </div>
             </div>
