@@ -3,23 +3,33 @@ import {
   UserInfoContext,
   UserInfoActionsContext,
 } from "../userInfo/UserInfoContexts";
+import { AuthToken, FakeData, Status, User } from "tweeter-shared";
 import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { AuthToken, FakeData, User } from "tweeter-shared";
-import { ToastActionsContext } from "../toaster/ToastContexts";
-import { useParams } from "react-router-dom";
-import { ToastType } from "../toaster/Toast";
-import UserItem from "../userItem/UserItem";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import StatusItem from "../statusItem/StatusItem";
+import { useMessageActions } from "../toaster/MessageHooks";
 
 export const PAGE_SIZE = 10;
 
-const FolloweesScroller = () => {
-  const { displayToast } = useContext(ToastActionsContext);
-  const [items, setItems] = useState<User[]>([]);
-  const [hasMoreItems, setHasMoreItems] = useState(true);
-  const [lastItem, setLastItem] = useState<User | null>(null);
+interface Props {
+  itemDescription: string;
+  featureUrl: string;
+  loadMore: (
+    authToken: AuthToken,
+    userAlias: string,
+    pageSize: number,
+    lastItem: Status | null
+  ) => Promise<[Status[], boolean]>;
+}
 
-  const addItems = (newItems: User[]) =>
+const StatusItemScroller = (props: Props) => {
+  const { displayErrorMessage } = useMessageActions();
+  const [items, setItems] = useState<Status[]>([]);
+  const [hasMoreItems, setHasMoreItems] = useState(true);
+  const [lastItem, setLastItem] = useState<Status | null>(null);
+
+  const addItems = (newItems: Status[]) =>
     setItems((previousItems) => [...previousItems, ...newItems]);
 
   const { displayedUser, authToken } = useContext(UserInfoContext);
@@ -53,9 +63,9 @@ const FolloweesScroller = () => {
     setHasMoreItems(() => true);
   };
 
-  const loadMoreItems = async (lastItem: User | null) => {
+  const loadMoreItems = async (lastItem: Status | null) => {
     try {
-      const [newItems, hasMore] = await loadMoreFollowees(
+      const [newItems, hasMore] = await props.loadMore(
         authToken!,
         displayedUser!.alias,
         PAGE_SIZE,
@@ -66,22 +76,10 @@ const FolloweesScroller = () => {
       setLastItem(() => newItems[newItems.length - 1]);
       addItems(newItems);
     } catch (error) {
-      displayToast(
-        ToastType.Error,
-        `Failed to load followees because of exception: ${error}`,
-        0
+      displayErrorMessage(
+        `Failed to load ${props.itemDescription} items because of exception: ${error}`
       );
     }
-  };
-
-  const loadMoreFollowees = async (
-    authToken: AuthToken,
-    userAlias: string,
-    pageSize: number,
-    lastFollowee: User | null
-  ): Promise<[User[], boolean]> => {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfUsers(lastFollowee, pageSize, userAlias);
   };
 
   const getUser = async (
@@ -106,7 +104,11 @@ const FolloweesScroller = () => {
             key={index}
             className="row mb-3 mx-0 px-0 border rounded bg-white"
           >
-            <UserItem user={item} featurePath="/followees" />
+            <StatusItem
+              user={item.user}
+              status={item}
+              featurePath={props.featureUrl}
+            />
           </div>
         ))}
       </InfiniteScroll>
@@ -114,4 +116,4 @@ const FolloweesScroller = () => {
   );
 };
 
-export default FolloweesScroller;
+export default StatusItemScroller;
