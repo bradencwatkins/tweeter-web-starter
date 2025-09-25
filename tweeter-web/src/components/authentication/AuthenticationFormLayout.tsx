@@ -1,10 +1,4 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import { useContext } from "react";
-import { ToastActionsContext } from "../toaster/ToastContexts";
-import { ToastType } from "../toaster/Toast";
 import OAuth from "./OAuth";
-import { useMessageActions } from "../toaster/MessageHooks";
 
 interface Props {
   headingText: string;
