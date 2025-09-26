@@ -2,14 +2,10 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Post from "./Post";
 import { AuthToken, FakeData, Status, User } from "tweeter-shared";
-import { ToastType } from "../toaster/Toast";
-import { useContext, useEffect, useState } from "react";
-import {
-  UserInfoActionsContext,
-  UserInfoContext,
-} from "../userInfo/UserInfoContexts";
+import { useEffect, useState } from "react";
 import { PAGE_SIZE } from "../mainLayout/UserItemScroller";
 import { useMessageActions } from "../toaster/MessageHooks";
+import { useUserInfo, useUserInfoActions } from "../userInfo/UserInfoHooks";
 
 /* interface to pass items prop */
 interface Props {
@@ -25,8 +21,8 @@ const statusItem = (props: Props) => {
   const [hasMoreItems, setHasMoreItems] = useState(true);
   const [lastItem, setLastItem] = useState<Status | null>(null);
 
-  const { displayedUser, authToken } = useContext(UserInfoContext);
-  const { setDisplayedUser } = useContext(UserInfoActionsContext);
+  const { displayedUser, authToken } = useUserInfo();
+  const { setDisplayedUser } = useUserInfoActions();
   const { displayedUser: displayedUserAliasParam } = useParams();
 
   const addItems = (newItems: Status[]) =>
