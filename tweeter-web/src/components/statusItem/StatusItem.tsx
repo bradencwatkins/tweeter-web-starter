@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { PAGE_SIZE } from "../mainLayout/UserItemScroller";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo, useUserInfoActions } from "../userInfo/UserInfoHooks";
+import { useUserNavigation } from "../userNavigation/UserNavigationHooks";
 
 /* interface to pass items prop */
 interface Props {
@@ -28,7 +29,7 @@ const statusItem = (props: Props) => {
   const addItems = (newItems: Status[]) =>
     setItems((previousItems) => [...previousItems, ...newItems]);
 
-  const navigate = useNavigate();
+  const { navigateToUser } = useUserNavigation();
 
   // Update the displayed user context variable whenever the displayedUser url parameter changes. This allows browser forward and back buttons to work correctly.
   useEffect(() => {
@@ -86,30 +87,6 @@ const statusItem = (props: Props) => {
     return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
   };
 
-  const navigateToUser = async (event: React.MouseEvent): Promise<void> => {
-    event.preventDefault();
-
-    try {
-      const alias = extractAlias(event.target.toString());
-
-      const toUser = await getUser(authToken!, alias);
-
-      if (toUser) {
-        if (!toUser.equals(displayedUser!)) {
-          setDisplayedUser(toUser);
-          navigate(`${props.featurePath}/${toUser.alias}`);
-        }
-      }
-    } catch (error) {
-      displayErrorMessage(`Failed to get user because of exception: ${error}`);
-    }
-  };
-
-  const extractAlias = (value: string): string => {
-    const index = value.indexOf("@");
-    return value.substring(index);
-  };
-
   const getUser = async (
     authToken: AuthToken,
     alias: string
@@ -136,7 +113,10 @@ const statusItem = (props: Props) => {
                 {props.user.firstName} {props.user.lastName}
               </b>{" "}
               -{" "}
-              <Link to={`/story/${props.user.alias}`} onClick={navigateToUser}>
+              <Link
+                to={`/story/${props.user.alias}`}
+                onClick={(event) => navigateToUser(event, props.featurePath)}
+              >
                 {props.user.alias}
               </Link>
             </h2>
