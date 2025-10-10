@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useMessageActions } from "../toaster/MessageHooks";
 
-interface props {}
 
 const OAuth = () => {
   const { displayInfoMessage } = useMessageActions();
