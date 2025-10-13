@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo, useUserInfoActions } from "../userInfo/UserInfoHooks";
-import { AuthToken, FakeData, User } from "tweeter-shared";
+import { UserService } from "../../model.service/UserService";
 
 // ACTUAL HOOK no cap
 export const useUserNavigation = () => {
@@ -9,6 +9,8 @@ export const useUserNavigation = () => {
   const { displayErrorMessage } = useMessageActions();
   const { displayedUser, authToken } = useUserInfo();
   const { setDisplayedUser } = useUserInfoActions();
+
+  const service = new UserService();
 
   const navigateToUser = async (
     event: React.MouseEvent,
@@ -19,7 +21,7 @@ export const useUserNavigation = () => {
     try {
       const alias = extractAlias(event.target.toString());
 
-      const toUser = await getUser(authToken!, alias);
+      const toUser = await service.getUser(authToken!, alias);
 
       if (toUser) {
         if (!toUser.equals(displayedUser!)) {
@@ -37,13 +39,6 @@ export const useUserNavigation = () => {
     return value.substring(index);
   };
 
-  const getUser = async (
-    authToken: AuthToken,
-    alias: string
-  ): Promise<User | null> => {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.findUserByAlias(alias);
-  };
   return {
     navigateToUser,
   };

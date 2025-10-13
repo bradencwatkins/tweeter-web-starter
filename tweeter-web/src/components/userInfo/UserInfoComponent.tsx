@@ -1,7 +1,6 @@
 import "./UserInfoComponent.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { AuthToken, FakeData, User } from "tweeter-shared";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo, useUserInfoActions } from "./UserInfoHooks";
 import {
@@ -28,18 +27,29 @@ const UserInfo = () => {
     setFolloweeCount: (value: number) => setFolloweeCount(value),
     setFollowerCount: (value: number) => setFollowerCount(value),
     displayError: (message: string) => displayErrorMessage(message),
+    setIsLoading: (value: boolean) => setIsLoading(value),
+    displayInfo: (message: string, duration: number) =>
+      displayInfoMessage(message, duration),
+    deleteMessage: (messageId: string) => deleteMessage(messageId),
   };
 
-  const presenter = new UserInfoPresenter(listener);
+  const presenterRef = useRef<UserInfoPresenter | null>(null);
+  if (!presenterRef.current) {
+    presenterRef.current = new UserInfoPresenter(listener);
+  }
 
   if (!displayedUser) {
     setDisplayedUser(currentUser!);
   }
 
   useEffect(() => {
-    presenter.determineFollowerStatus(authToken!, currentUser!, displayedUser!);
-    presenter.setNumbFollowees(authToken!, displayedUser!);
-    presenter.setNumbFollowers(authToken!, displayedUser!);
+    presenterRef.current!.determineFollowerStatus(
+      authToken!,
+      currentUser!,
+      displayedUser!
+    );
+    presenterRef.current!.setNumbFollowees(authToken!, displayedUser!);
+    presenterRef.current!.setNumbFollowers(authToken!, displayedUser!);
   }, [displayedUser]);
 
   const switchToLoggedInUser = (event: React.MouseEvent): void => {
@@ -53,110 +63,20 @@ const UserInfo = () => {
     return segments.length > 1 ? segments[0] : "/";
   };
 
-  const followDisplayedUser = async (
-    event: React.MouseEvent
-  ): Promise<void> => {
-    event.preventDefault();
-
-    var followingUserToast = "";
-
-    try {
-      setIsLoading(true);
-      followingUserToast = displayInfoMessage(
-        `Following ${displayedUser!.name}...`,
-        0
-      );
-
-      const [followerCount, followeeCount] = await follow(
-        authToken!,
-        displayedUser!
-      );
-
-      setIsFollower(true);
-      setFollowerCount(followerCount);
-      setFolloweeCount(followeeCount);
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to follow user because of exception: ${error}`
-      );
-    } finally {
-      deleteMessage(followingUserToast);
-      setIsLoading(false);
-    }
+  const followDisplayedUser = (event: React.MouseEvent): void => {
+    presenterRef.current!.followDisplayedUser(
+      event,
+      authToken!,
+      displayedUser!
+    );
   };
 
-  const follow = async (
-    authToken: AuthToken,
-    userToFollow: User
-  ): Promise<[followerCount: number, followeeCount: number]> => {
-    // Pause so we can see the follow message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
-
-    // TODO: Call the server
-
-    const followerCount = await presenter.getFollowerCount(
-      authToken,
-      userToFollow
+  const unfollowDisplayedUser = (event: React.MouseEvent): void => {
+    presenterRef.current!.unfollowDisplayedUser(
+      event,
+      authToken!,
+      displayedUser!
     );
-    const followeeCount = await presenter.getFolloweeCount(
-      authToken,
-      userToFollow
-    );
-
-    return [followerCount, followeeCount];
-  };
-
-  const unfollowDisplayedUser = async (
-    event: React.MouseEvent
-  ): Promise<void> => {
-    event.preventDefault();
-
-    var unfollowingUserToast = "";
-
-    try {
-      setIsLoading(true);
-      unfollowingUserToast = displayInfoMessage(
-        `Unfollowing ${displayedUser!.name}...`,
-        0
-      );
-
-      const [followerCount, followeeCount] = await unfollow(
-        authToken!,
-        displayedUser!
-      );
-
-      setIsFollower(false);
-      setFollowerCount(followerCount);
-      setFolloweeCount(followeeCount);
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to unfollow user because of exception: ${error}`
-      );
-    } finally {
-      deleteMessage(unfollowingUserToast);
-      setIsLoading(false);
-    }
-  };
-
-  const unfollow = async (
-    authToken: AuthToken,
-    userToUnfollow: User
-  ): Promise<[followerCount: number, followeeCount: number]> => {
-    // Pause so we can see the unfollow message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
-
-    // TODO: Call the server
-
-    const followerCount = await presenter.getFollowerCount(
-      authToken,
-      userToUnfollow
-    );
-    const followeeCount = await presenter.getFolloweeCount(
-      authToken,
-      userToUnfollow
-    );
-
-    return [followerCount, followeeCount];
   };
 
   return (
