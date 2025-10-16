@@ -13,6 +13,7 @@ export class FolloweePresenter extends UserItemPresenter {
   }
 
   public async loadMoreItems(authToken: AuthToken, userAlias: string) {
+    
     try {
       const [newItems, hasMore] = await this.service.loadMoreFollowees(
         authToken,
