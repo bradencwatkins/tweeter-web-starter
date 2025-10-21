@@ -24,7 +24,6 @@ const Login = (props: Props) => {
   const { displayErrorMessage } = useMessageActions();
 
   const listener: LoginView = {
-    setIsLoading: (value: boolean) => setIsLoading(value),
     updateUserInfo: (
       currentUser: User,
       displayedUser: User,
@@ -47,8 +46,12 @@ const Login = (props: Props) => {
     }
   };
 
-  const doLogin = () => {
-    presenter.doLogin(alias, password, rememberMe, props.originalUrl);
+  const doLogin = async () => {
+    try {
+      await presenter.doLogin(alias, password, rememberMe, props.originalUrl);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const inputFieldFactory = () => {

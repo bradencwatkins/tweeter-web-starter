@@ -28,7 +28,6 @@ const Register = () => {
   const { displayErrorMessage } = useMessageActions();
 
   const listener: RegisterView = {
-    setIsLoading: (value: boolean) => setIsLoading(value),
     updateUserInfo: (
       currentUser: User,
       displayedUser: User,
@@ -66,15 +65,20 @@ const Register = () => {
   };
 
   const doRegister = async () => {
-    presenter.doRegister(
-      firstName,
-      lastName,
-      alias,
-      password,
-      imageBytes,
-      imageFileExtension,
-      rememberMe
-    );
+    setIsLoading(true);
+    try {
+      presenter.doRegister(
+        firstName,
+        lastName,
+        alias,
+        password,
+        imageBytes,
+        imageFileExtension,
+        rememberMe
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const inputFieldFactory = () => {
