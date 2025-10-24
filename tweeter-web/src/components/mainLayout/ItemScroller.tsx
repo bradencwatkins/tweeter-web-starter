@@ -9,7 +9,6 @@ import {
 } from "../../presenter/PagedItemPresenter";
 
 interface Props<T> {
-  featureUrl: string;
   presenterFactory: (view: PagedItemView<T>) => PagedItemPresenter<T, any>;
   itemComponentFactory: (item: T) => JSX.Element;
 }

@@ -63,11 +63,10 @@ const AuthenticatedRoutes = () => {
           element={
             <ItemScroller
               key={`feed-${displayedUser!.alias}`}
-              featureUrl="/feed"
               presenterFactory={(view: PagedItemView<Status>) =>
                 new FeedPresenter(view)
               }
-              itemComponentFactory={createStatusItemFactory("feed")}
+              itemComponentFactory={createStatusItemFactory("/feed")}
             />
           }
         />
@@ -76,11 +75,10 @@ const AuthenticatedRoutes = () => {
           element={
             <ItemScroller
               key={`story-${displayedUser!.alias}`}
-              featureUrl="/story"
               presenterFactory={(view: PagedItemView<Status>) =>
                 new StoryPresenter(view)
               }
-              itemComponentFactory={createStatusItemFactory("story")}
+              itemComponentFactory={createStatusItemFactory("/story")}
             />
           }
         />
@@ -89,11 +87,10 @@ const AuthenticatedRoutes = () => {
           element={
             <ItemScroller
               key={`followees-${displayedUser!.alias}`}
-              featureUrl="/followees"
               presenterFactory={(view: PagedItemView<User>) =>
                 new FolloweePresenter(view)
               }
-              itemComponentFactory={createUserItemFactory("followees")}
+              itemComponentFactory={createUserItemFactory("/followees")}
             />
           }
         />
@@ -102,11 +99,10 @@ const AuthenticatedRoutes = () => {
           element={
             <ItemScroller
               key={`followers-${displayedUser!.alias}`}
-              featureUrl="/followers"
               presenterFactory={(view: PagedItemView<User>) =>
                 new FollowerPresenter(view)
               }
-              itemComponentFactory={createUserItemFactory("followers")}
+              itemComponentFactory={createUserItemFactory("/followers")}
             />
           }
         />
