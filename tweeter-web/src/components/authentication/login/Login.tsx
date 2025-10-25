@@ -1,6 +1,6 @@
 import "./Login.css";
 import "bootstrap/dist/css/bootstrap.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
 import { AuthToken, User } from "tweeter-shared";
@@ -11,6 +11,7 @@ import { LoginPresenter, LoginView } from "../../../presenter/LoginPresenter";
 
 interface Props {
   originalUrl?: string;
+  presenter?: LoginPresenter;
 }
 
 const Login = (props: Props) => {
@@ -34,7 +35,14 @@ const Login = (props: Props) => {
     displayErrorMessage: (message: string) => displayErrorMessage(message),
   };
 
-  const presenter = new LoginPresenter(listener);
+  const presenterRef = useRef<LoginPresenter | null>(null);
+  if (!presenterRef.current) {
+    presenterRef.current = props.presenter ?? new LoginPresenter(listener);
+  }
+
+  useEffect(() => {
+    presenterRef.current = props.presenter ?? new LoginPresenter(listener);
+  }, [rememberMe]);
 
   const checkSubmitButtonStatus = (): boolean => {
     return !alias || !password;
@@ -48,7 +56,12 @@ const Login = (props: Props) => {
 
   const doLogin = async () => {
     try {
-      await presenter.doLogin(alias, password, rememberMe, props.originalUrl);
+      await presenterRef.current!.doLogin(
+        alias,
+        password,
+        rememberMe,
+        props.originalUrl
+      );
     } finally {
       setIsLoading(false);
     }

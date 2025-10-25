@@ -18,16 +18,11 @@ export abstract class Presenter<V extends View> {
     return this._view;
   }
 
-  protected async doFailureReportingOperation(
-    operation: () => Promise<void>,
-    operationDescription: string
-  ) {
+  protected async doFailureReportingOperation(operation: () => Promise<void>, operationDescription: string) {
     try {
       await operation();
     } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to ${operationDescription} because of exception: ${error}`
-      );
+      this.view.displayErrorMessage(`Failed to ${operationDescription} because of exception: ${(error as Error).message}`);
     }
   }
 }

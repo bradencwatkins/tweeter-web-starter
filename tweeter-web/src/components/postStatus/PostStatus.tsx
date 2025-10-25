@@ -1,5 +1,5 @@
 import "./PostStatus.css";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo } from "../userInfo/UserInfoHooks";
 import {
@@ -7,7 +7,11 @@ import {
   PostStatusView,
 } from "../../presenter/PostStatusPresenter";
 
-const PostStatus = () => {
+interface Props {
+  presenter?: PostStatusPresenter;
+}
+
+const PostStatus = (props: Props) => {
   const { displayInfoMessage, displayErrorMessage, deleteMessage } =
     useMessageActions();
 
@@ -23,14 +27,17 @@ const PostStatus = () => {
     deleteMessage: (messageId: string) => deleteMessage(messageId),
   };
 
-  const presenter = new PostStatusPresenter(listener);
+  const presenterRef = useRef<PostStatusPresenter | null>(null);
+  if (!presenterRef.current) {
+    presenterRef.current = props.presenter ?? new PostStatusPresenter(listener);
+  }
 
   const submitPost = async (event: React.MouseEvent) => {
     event.preventDefault();
     setIsLoading(true);
     const postingStatusToastId = displayInfoMessage("Posting status...", 0);
     try {
-      await presenter.submitPost(post, currentUser, authToken);
+      await presenterRef.current!.submitPost(post, currentUser, authToken);
     } finally {
       deleteMessage(postingStatusToastId);
       setIsLoading(false);
@@ -52,6 +59,7 @@ const PostStatus = () => {
         <textarea
           className="form-control"
           id="postStatusTextArea"
+          aria-label="post text area"
           rows={10}
           placeholder="What's on your mind?"
           value={post}
